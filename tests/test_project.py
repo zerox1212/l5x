@@ -207,6 +207,7 @@ class ContentElements(unittest.TestCase):
     def test_programs(self):
         """Confirm access to the set of programs."""
         prj = fixture.create_project(self.add_mock_program)
+        self.assertIsInstance(prj.programs, l5x.project.Programs)
         prj.programs['Some Program']
 
     def add_mock_program(self, doc):

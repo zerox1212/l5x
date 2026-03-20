@@ -3,6 +3,7 @@ Unit tests for a project's programs object.
 """
 
 from tests import fixture
+import l5x
 import unittest
 
 
@@ -58,6 +59,10 @@ class Programs(unittest.TestCase):
         self.assertEqual(set(self.programs.names),
                          set(('MainProgram', 'prog2')))
 
+    def test_programs_wrapper_type(self):
+        """Confirm programs is exposed as a wrapper class."""
+        self.assertIsInstance(self.programs, l5x.project.Programs)
+
     def test_names_read_only(self):
         """Ensure names attribute is read-only."""
         with self.assertRaises(AttributeError):
@@ -74,3 +79,13 @@ class Programs(unittest.TestCase):
                          set(('main_tag_1', 'main_tag_2')))
         self.assertEqual(set(self.programs['prog2'].tags.names),
                          set(('prog2_tag_1', 'prog2_tag_2')))
+
+    def test_routines_names(self):
+        """Ensure routines names attribute is a iterable of non-empty strings."""
+        self.assertEqual(set(self.programs['MainProgram'].routines.names), set())
+        self.assertEqual(set(self.programs['prog2'].routines.names), set())
+
+    def test_routines_wrapper_type(self):
+        """Confirm routines is exposed as a wrapper class."""
+        self.assertIsInstance(self.programs['MainProgram'].routines,
+                              l5x.project.Routines)

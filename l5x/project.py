@@ -10,7 +10,7 @@ __get__() method. In this way the application can process L5X projects
 without worrying about low-level XML handling.
 """
 
-from .dom import (CDATA_TAG, ElementDict, AttributeDescriptor)
+from .dom import (CDATA_TAG, ElementDict, AttributeDescriptor, ElementCDATA)
 from .module import (Module, SafetyNetworkNumber)
 from .tag import Scope
 import io
@@ -46,7 +46,7 @@ class Project(object):
         self.controller = Controller(ctl_element, lang)
 
         progs = ctl_element.find('Programs')
-        self.programs = ElementDict(progs, 'Name', Scope, value_args=[lang])
+        self.programs = Programs(progs, lang)
 
         mods = ctl_element.find('Modules')
         self.modules = ElementDict(mods, 'Name', Module)
@@ -179,3 +179,81 @@ class Controller(Scope):
     # The safety network number is stored in the first module element,
     # not the Controller element.
     snn = SafetyNetworkNumber('Modules/Module')
+
+
+class CollectionNames(object):
+    """Descriptor class to proxy a wrapped ElementDict's names attribute."""
+    def __get__(self, instance, owner=None):
+        return instance.members.names
+
+    def __set__(self, instance, value):
+        raise AttributeError('Read-only attribute.')
+
+
+class Programs(object):
+    """Accessor object for the top-level set of programs."""
+    names = CollectionNames()
+
+    def __init__(self, element, lang):
+        self.element = element
+        self.members = ElementDict(element, 'Name', Program, value_args=[lang])
+
+    def __getitem__(self, key):
+        return self.members[key]
+
+
+class Program(Scope):
+    """Accessor object for a program."""
+    def __init__(self, element, lang):
+        Scope.__init__(self, element, lang)
+        routines_element = element.find('Routines')
+        self.routines = Routines(routines_element, lang)
+
+
+class Routines(object):
+    """Accessor object for a program's routines."""
+    names = CollectionNames()
+
+    def __init__(self, element, lang):
+        self.element = element
+        self.members = ElementDict(element, 'Name', Routine, value_args=[lang])
+
+    def __getitem__(self, key):
+        return self.members[key]
+
+
+class Routine(object):
+    """Accessor object for a routine."""
+    type = AttributeDescriptor('Type', True)
+
+    def __init__(self, element, lang):
+        self.element = element
+        self.lang = lang
+        content = element.find('RLLContent')
+        if content is not None:
+            self.rungs = Rungs(content, lang)
+
+
+class Rungs(object):
+    """Accessor object for a routine's rungs."""
+    names = CollectionNames()
+
+    def __init__(self, element, lang):
+        self.element = element
+        self.members = ElementDict(element, 'Number', Rung,
+                                   key_type=int, value_args=[lang])
+
+    def __getitem__(self, key):
+        return self.members[key]
+
+
+class Rung(object):
+    """Accessor object for a rung."""
+    number = AttributeDescriptor('Number', True)
+    type = AttributeDescriptor('Type', True)
+    comment = ElementCDATA('Comment')
+    text = ElementCDATA('Text', ['Comment'])
+
+    def __init__(self, element, lang):
+        self.element = element
+        self.lang = lang

@@ -53,13 +53,54 @@ Programs
 
 A project's programs attribute contains a names attribute that evaluates
 to an iterable of program names, members of which can be used as indices to
-access program-scoped tags.
+access program-scoped tags and routines. A specific program object contains
+its own tags attribute and a routines attribute.
 
 ::
 
 	>>> prj.programs.names
 	['MainProgram', 'AnotherProgram']
 	>>> prj.programs['MainProgram'].tags['a_program_tag'].value = 50
+	>>> prj.programs['MainProgram'].routines.names
+	['MainRoutine']
+
+
+Routines
+-------------------------
+
+Program objects provide access to their routines through the routines
+attribute. Indexing a routine collection with a routine name returns a
+routine object.
+
+::
+
+	>>> routine = prj.programs['MainProgram'].routines['MainRoutine']
+	>>> routine.type
+	'RLL'
+	>>> routine.rungs.names
+	[0, 1, 2]
+
+Ladder routines contain a rungs attribute. Structured text and other
+routine types may not contain rungs.
+
+
+Rungs
+-------------------------
+
+Ladder routine rungs are indexed by rung number. Each rung object provides
+access to the rung comment and rung text as strings.
+
+::
+
+	>>> rung = prj.programs['MainProgram'].routines['MainRoutine'].rungs[0]
+	>>> rung.comment
+	'Test description'
+	>>> rung.text
+	'XIC(testTag)NOP();'
+
+Rung comments and text are stored in the L5X file as CDATA-backed XML
+elements, but the library handles that conversion automatically during
+read and write operations.
 
 
 Tags

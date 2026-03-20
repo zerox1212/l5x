@@ -206,6 +206,58 @@ class ElementDescription(object):
             remove_localized_cdata(instance.element, desc, instance.lang)
 
 
+class ElementCDATA(object):
+    """Descriptor class for accessing a child element containing CDATA."""
+    def __init__(self, name, follow=[]):
+        self.name = name
+        self.follow = follow
+
+    def __get__(self, instance, owner=None):
+        element = instance.element.find(self.name)
+        if element is not None:
+            cdata = get_localized_cdata(element, instance.lang)
+            if cdata is not None:
+                return str(cdata)
+        return None
+
+    def __set__(self, instance, value):
+        if isinstance(value, str):
+            if self.__get__(instance) is not None:
+                self.modify(instance, value)
+            else:
+                self.create(instance, value)
+        elif value is None:
+            self.remove(instance)
+        else:
+            raise TypeError('Value must be a string or None')
+
+    def modify(self, instance, value):
+        element = instance.element.find(self.name)
+        modify_localized_cdata(element, instance.lang, value)
+
+    def create(self, instance, value):
+        element = instance.element.find(self.name)
+        if element is None:
+            element = ElementTree.Element(self.name)
+            self.insert(instance, element)
+
+        create_localized_cdata(element, instance.lang, value)
+
+    def insert(self, instance, element):
+        dest_index = 0
+        i = 0
+        for e in instance.element:
+            if e.tag in self.follow:
+                dest_index = i + 1
+            i += 1
+        instance.element.insert(dest_index, element)
+
+    def remove(self, instance):
+        element = instance.element.find(self.name)
+        if element is not None:
+            remove_localized_cdata(instance.element, element, instance.lang)
+
+
 class AttributeDescriptor(object):
     """Generic descriptor class for accessing an XML element's attribute."""
     def __init__(self, name, read_only=False):

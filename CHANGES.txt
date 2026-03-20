@@ -34,4 +34,4 @@ v1.7,
  - Add support for changing message tag parameters.
 
  v1.8
- - Add support for accessing programs, routines, and rungs.
+ - Add support for accessing datatypes (UDTs), AOI Definitions, programs, routines, and rungs.

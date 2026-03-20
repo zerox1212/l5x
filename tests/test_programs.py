@@ -88,4 +88,4 @@ class Programs(unittest.TestCase):
     def test_routines_wrapper_type(self):
         """Confirm routines is exposed as a wrapper class."""
         self.assertIsInstance(self.programs['MainProgram'].routines,
-                              l5x.project.Routines)
+                              l5x.logic.Routines)

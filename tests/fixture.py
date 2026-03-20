@@ -54,7 +54,8 @@ def create_project(*populate):
     root.appendChild(controller)
 
     # Create the top-level elements under the Controller.
-    for tag in ['Tags', 'Programs', 'Modules']:
+    for tag in ['DataTypes', 'Tags', 'Programs', 'Modules',
+                'AddOnInstructionDefinitions']:
         element = doc.createElement(tag)
         controller.appendChild(element)
 

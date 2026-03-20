@@ -10,7 +10,10 @@ __get__() method. In this way the application can process L5X projects
 without worrying about low-level XML handling.
 """
 
-from .dom import (CDATA_TAG, ElementDict, AttributeDescriptor, ElementCDATA)
+from .dom import (CDATA_TAG, ElementDict, AttributeDescriptor)
+from .addon import AddOnInstructionDefinition
+from .datatype import DataType
+from .logic import Routines
 from .module import (Module, SafetyNetworkNumber)
 from .tag import Scope
 import io
@@ -176,6 +179,15 @@ class Controller(Scope):
     """Accessor object for the controller device."""
     comm_path = AttributeDescriptor('CommPath')
 
+    def __init__(self, element, lang):
+        Scope.__init__(self, element, lang)
+        data_types = element.find('DataTypes')
+        self.datatypes = ElementDict(data_types, 'Name', DataType,
+                                     value_args=[lang])
+        definitions = element.find('AddOnInstructionDefinitions')
+        self.addons = ElementDict(definitions, 'Name',
+                                  AddOnInstructionDefinition)
+
     # The safety network number is stored in the first module element,
     # not the Controller element.
     snn = SafetyNetworkNumber('Modules/Module')
@@ -208,52 +220,3 @@ class Program(Scope):
         Scope.__init__(self, element, lang)
         routines_element = element.find('Routines')
         self.routines = Routines(routines_element, lang)
-
-
-class Routines(object):
-    """Accessor object for a program's routines."""
-    names = CollectionNames()
-
-    def __init__(self, element, lang):
-        self.element = element
-        self.members = ElementDict(element, 'Name', Routine, value_args=[lang])
-
-    def __getitem__(self, key):
-        return self.members[key]
-
-
-class Routine(object):
-    """Accessor object for a routine."""
-    type = AttributeDescriptor('Type', True)
-
-    def __init__(self, element, lang):
-        self.element = element
-        self.lang = lang
-        content = element.find('RLLContent')
-        if content is not None:
-            self.rungs = Rungs(content, lang)
-
-
-class Rungs(object):
-    """Accessor object for a routine's rungs."""
-    names = CollectionNames()
-
-    def __init__(self, element, lang):
-        self.element = element
-        self.members = ElementDict(element, 'Number', Rung,
-                                   key_type=int, value_args=[lang])
-
-    def __getitem__(self, key):
-        return self.members[key]
-
-
-class Rung(object):
-    """Accessor object for a rung."""
-    number = AttributeDescriptor('Number', True)
-    type = AttributeDescriptor('Type', True)
-    comment = ElementCDATA('Comment')
-    text = ElementCDATA('Text', ['Comment'])
-
-    def __init__(self, element, lang):
-        self.element = element
-        self.lang = lang

@@ -46,7 +46,7 @@ class Routines(unittest.TestCase):
 
     def test_routines_wrapper_type(self):
         """Confirm routines is exposed as a wrapper class."""
-        self.assertIsInstance(self.program.routines, l5x.project.Routines)
+        self.assertIsInstance(self.program.routines, l5x.logic.Routines)
 
     def test_names_read(self):
         """Test names attribute returns all routine names."""
@@ -80,7 +80,7 @@ class Routines(unittest.TestCase):
     def test_rungs_wrapper_type(self):
         """Confirm ladder routines expose a rungs wrapper."""
         self.assertIsInstance(self.program.routines['MainRoutine'].rungs,
-                              l5x.project.Rungs)
+                              l5x.logic.Rungs)
 
     def test_rung_numbers(self):
         """Confirm rungs are indexed by rung number."""
